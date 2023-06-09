@@ -84,7 +84,7 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-# dist
+dist
 
 # Gatsby files
 .cache/
@@ -119,7 +119,7 @@ out
 
 # built artifacts
 build/
-dist/
+# dist/
 
 # docker
 docker-compose.yml
