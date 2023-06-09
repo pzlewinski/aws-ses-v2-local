@@ -2,7 +2,9 @@ import type { RequestHandler } from 'express';
 import type { JSONSchema7 } from 'json-schema';
 import { AddressObject, simpleParser } from 'mailparser';
 import ajv from '../ajv';
-import { saveEmail } from '../store';
+import { saveEmail, hasTemplate, getTemplate, Template } from '../store';
+
+type TemplateMap = Template | undefined
 
 const handler: RequestHandler = (req, res, next) => {
   const valid = validate(req.body);
@@ -15,6 +17,8 @@ const handler: RequestHandler = (req, res, next) => {
     handleSimple(req, res, next);
   } else if (req.body.Content?.Raw) {
     handleRaw(req, res, next);
+  } else if (req.body.Content?.Template){
+    handleTemplate(req, res, next);
   } else {
     res.status(400).send({ message: 'Bad Request Exception', detail: 'aws-ses-v2-local: Must have either Simple or Raw content. Want to add support for other types of emails? Open a PR!' });
   }
@@ -83,6 +87,41 @@ const handleRaw: RequestHandler = async (req, res) => {
   });
 
   res.status(200).send({ MessageId: messageId });
+};
+
+const handleTemplate: RequestHandler = async (req, res) => {
+  if (!req.body.Content?.Template?.TemplateName) {
+    res.status(400).send({ message: 'Bad Request Exception', detail: 'aws-ses-v2-local: Simple content must have a subject.' });
+    return;
+  }
+
+  const template: TemplateMap = getTemplate(req.body.Content.Template.TemplateName);
+
+  if (template === undefined) {
+    res.status(400).send({ type: 'DoesntExistsException', message: 'The resource specified in your request doesnt exists.' });
+    return;
+  }
+
+  const messageId = `ses-${Math.floor(Math.random() * 900000000 + 100000000)}`;
+  saveEmail({
+      messageId,
+      from: req.body.FromEmailAddress,
+      replyTo: req.body.ReplyToAddresses ?? [],
+      destination: {
+          to: req.body.Destination?.ToAddresses ?? [],
+          cc: req.body.Destination?.CcAddresses ?? [],
+          bcc: req.body.Destination?.BccAddresses ?? [],
+      },
+      subject: template.TemplateContent.Subject,
+      body: {
+          html: template.TemplateContent?.Html,
+          text: template.TemplateContent?.Text,
+      },
+      attachments: [],
+      at: Math.floor(new Date().getTime() / 1000),
+  });
+  res.status(200).send({ MessageId: messageId });
+
 };
 
 export default handler;
