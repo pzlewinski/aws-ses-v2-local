@@ -31,6 +31,7 @@ export interface Template {
         Text: string;
     };
     TemplateName: string;
+    TemplateData: string;
 }
 export declare const saveEmail: (email: Email) => void;
 export declare const hasTemplate: (key: string) => boolean;
