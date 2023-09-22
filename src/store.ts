@@ -30,6 +30,7 @@ export interface Template {
     Text: string,
   },
   TemplateName: string,
+  TemplateData: string,
 }
 
 const store: Store = {
