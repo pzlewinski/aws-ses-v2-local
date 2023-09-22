@@ -103,7 +103,7 @@ const handleTemplate: RequestHandler = async (req, res) => {
     return;
   }
 
-  if (!req.body.Content?.Template?.TemplateData) {
+  if (req.body.Content?.Template?.TemplateData) {
     const templateData: any = JSON.parse(req.body.Content.Template.TemplateData)
     const templateCompile = Handlebars.compile(template.TemplateContent.Html)
     template.TemplateContent.Html = templateCompile(templateData)

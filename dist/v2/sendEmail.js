@@ -91,7 +91,7 @@ const handleTemplate = async (req, res) => {
         res.status(400).send({ type: 'DoesntExistsException', message: 'The resource specified in your request doesnt exists.' });
         return;
     }
-    if (!req.body.Content?.Template?.TemplateData) {
+    if (req.body.Content?.Template?.TemplateData) {
         const templateData = JSON.parse(req.body.Content.Template.TemplateData);
         const templateCompile = handlebars_1.default.compile(template.TemplateContent.Html);
         template.TemplateContent.Html = templateCompile(templateData);
