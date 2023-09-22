@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const handlebars_1 = __importDefault(require("handlebars"));
 const mailparser_1 = require("mailparser");
 const ajv_1 = __importDefault(require("../ajv"));
 const store_1 = require("../store");
@@ -89,6 +90,11 @@ const handleTemplate = async (req, res) => {
     if (template === undefined) {
         res.status(400).send({ type: 'DoesntExistsException', message: 'The resource specified in your request doesnt exists.' });
         return;
+    }
+    if (!req.body.Content?.Template?.TemplateData) {
+        const templateData = JSON.parse(req.body.Content.Template.TemplateData);
+        const templateCompile = handlebars_1.default.compile(template.TemplateContent.Html);
+        template.TemplateContent.Html = templateCompile(templateData);
     }
     const messageId = `ses-${Math.floor(Math.random() * 900000000 + 100000000)}`;
     (0, store_1.saveEmail)({
