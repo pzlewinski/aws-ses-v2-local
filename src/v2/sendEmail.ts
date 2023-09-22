@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express';
+import Handlebars from 'handlebars';
 import type { JSONSchema7 } from 'json-schema';
 import { AddressObject, simpleParser } from 'mailparser';
 import ajv from '../ajv';
@@ -100,6 +101,12 @@ const handleTemplate: RequestHandler = async (req, res) => {
   if (template === undefined) {
     res.status(400).send({ type: 'DoesntExistsException', message: 'The resource specified in your request doesnt exists.' });
     return;
+  }
+
+  if (!req.body.Content?.Template?.TemplateData) {
+    const templateData: any = JSON.parse(req.body.Content.Template.TemplateData)
+    const templateCompile = Handlebars.compile(template.TemplateContent.Html)
+    template.TemplateContent.Html = templateCompile(templateData)
   }
 
   const messageId = `ses-${Math.floor(Math.random() * 900000000 + 100000000)}`;
