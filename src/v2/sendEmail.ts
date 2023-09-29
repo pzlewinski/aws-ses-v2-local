@@ -104,9 +104,13 @@ const handleTemplate: RequestHandler = async (req, res) => {
   }
 
   if (req.body.Content?.Template?.TemplateData) {
-    const templateData: any = JSON.parse(req.body.Content.Template.TemplateData)
-    const templateCompile = Handlebars.compile(template.TemplateContent.Html)
-    template.TemplateContent.Html = templateCompile(templateData)
+    try {
+      const templateData: any = JSON.parse(req.body.Content.Template.TemplateData);
+      const templateCompile = Handlebars.compile(template.TemplateContent.Html);
+      template.TemplateContent.Html = templateCompile(templateData);
+    } catch (error) {
+      console.log('Handlebars compile error:', error);
+    }
   }
 
   const messageId = `ses-${Math.floor(Math.random() * 900000000 + 100000000)}`;

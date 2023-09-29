@@ -92,9 +92,14 @@ const handleTemplate = async (req, res) => {
         return;
     }
     if (req.body.Content?.Template?.TemplateData) {
-        const templateData = JSON.parse(req.body.Content.Template.TemplateData);
-        const templateCompile = handlebars_1.default.compile(template.TemplateContent.Html);
-        template.TemplateContent.Html = templateCompile(templateData);
+        try {
+            const templateData = JSON.parse(req.body.Content.Template.TemplateData);
+            const templateCompile = handlebars_1.default.compile(template.TemplateContent.Html);
+            template.TemplateContent.Html = templateCompile(templateData);
+        }
+        catch (error) {
+            console.log('Handlebars compile error:', error);
+        }
     }
     const messageId = `ses-${Math.floor(Math.random() * 900000000 + 100000000)}`;
     (0, store_1.saveEmail)({
